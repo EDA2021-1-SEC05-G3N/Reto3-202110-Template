@@ -36,8 +36,12 @@ operación solicitada
 
 def printMenu():
     print("Bienvenido")
-    print("1- Cargar información en el catálogo")
-    print("2- ")
+    print("0- Cargar información en el catálogo")
+    print("1- : Caracterizar las reproducciones ")
+    print("2- : Encontrar música para festejar ")
+    print("3- : Encontrar música para estudiar ")
+    print("4- : Estimar las reproducciones de los géneros musicales ")
+    print("5- : : Indicar el género musical más escuchado en un tiempo ")
 
 catalog = None
 
@@ -47,12 +51,18 @@ Menu principal
 while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
-    if int(inputs[0]) == 1:
+    if int(inputs[0]) == 0:
         print("Cargando información de los archivos ....")
-
+    elif int(inputs[0]) == 1:
+        print("Se ejecuto el requerimiento 1")
     elif int(inputs[0]) == 2:
-        pass
-
+        print(("Se ejecuto el requerimiento 2")
+    elif int(inputs[0]) == 3:
+        print("Se ejecuto el requerimiento 3")
+    elif int(inputs[0]) == 4:
+        print("Se ejecuto el requerimiento 4")
+    elif int(inputs[0]) == 5:
+        print("Se ejecuto el requerimiento 5")
     else:
         sys.exit(0)
 sys.exit(0)
