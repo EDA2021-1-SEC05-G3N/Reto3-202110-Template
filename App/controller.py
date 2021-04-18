@@ -106,6 +106,8 @@ def requerimiento1(catalog, menor, mayor, caracteristica):
 def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
     return model.requerimiento2(catalog, menor1, mayor1, menor2, mayor2)
 
+def requerimiento3(catalog, menor1, mayor1, menor2, mayor2):
+    return model.requerimiento3(catalog, menor1, mayor1, menor2, mayor2)
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo

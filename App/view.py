@@ -27,6 +27,7 @@ from DISClib.ADT import list as lt
 assert cf
 import model
 from DISClib.ADT import orderedmap as om
+from DISClib.DataStructures import mapentry as me
 
 """
 La vista se encarga de la interacción con el usuario
@@ -57,6 +58,20 @@ def loadData(catalog):
     """
     return controller.loadData(catalog)
 
+def printReq2_3(menor1, mayor1, menor2, mayor2, numero, mapa):
+
+    print('\n++++++ Req No. 2 results... ++++++')
+    print('Energy is between '+str(menor1)+' and '+str(mayor1))
+    print('Danceability is between '+str(menor2)+' and '+str(mayor2))
+    print('Total of unique tracks in events: '+str(numero)+"\n")
+
+    lista_llaves = om.keySet(mapa)
+    n = 1
+    for llave in lt.iterator(lista_llaves):
+        valor = me.getValue(om.get(mapa, llave))
+        print('Track '+str(n)+': '+str(llave)+' with energy of '+str(valor[0])+' and danceability of '+str(valor[1]))
+        n += 1
+
 catalog = None
 
 """
@@ -71,7 +86,6 @@ while True:
         catalog = controller.initCatalog()
         
     elif int(inputs[0]) == 2:
-
         print("\nCargando información de eventos ....")
         respuesta = controller.loadData(catalog)
         print('Altura del arbol: ' + str(controller.indexHeight(catalog)))
@@ -79,30 +93,53 @@ while True:
         print('Menor Llave: ' + str(controller.minKey(catalog)))
         print('Mayor Llave: ' + str(controller.maxKey(catalog)))
 
+
     elif int(inputs[0]) == 3:
         caracteristica = input("Ingrese la característica: ")
-        #caracteristica = "instrumentalness"
         menor = float(input("Ingrese el rango menor: "))
         mayor = float(input("Ingrese el rango mayor: "))
+        #
+        caracteristica, menor, mayor = 'instrumentalness', 0.75, 1.0
+        #
         respuesta = controller.requerimiento1(catalog, menor, mayor, caracteristica)
+
+        print('\n++++++ Req No. 1 results... +++++')
+        print('Instrumentalness is between '+str(menor)+' and '+str(mayor))
         print("Total of reproduction: "+str(respuesta[0])+" Total of unique artists: "+str(respuesta[1]))
-        print("Se ejecuto el requerimiento 1\n")
+        print("\nSe ejecutó el requerimiento 1\n")
+
+
     elif int(inputs[0]) == 4:
         menor1 = float(input("Ingrese el rango menor de Energy: "))
         mayor1 = float(input("Ingrese el rango mayor de Energy: "))
         menor2 = float(input("Ingrese el rango menor de Danceability: "))
         mayor2 = float(input("Ingrese el rango mayor de Danceability: "))
+        #
         menor1, mayor1, menor2, mayor2 = 0.5, 0.75, 0.75, 1 
         respuesta = controller.requerimiento2(catalog, menor1, mayor1, menor2, mayor2)
-        print(respuesta)
-        #print("Total of reproduction: "+str(respuesta[0])+" Total of unique artists: "+str(respuesta[1]))
-        print("Se ejecuto el requerimiento 2\n")
+        
+        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1])
+        print("\nSe ejecutó el requerimiento 2\n")
+
+
     elif int(inputs[0]) == 5:
-        print("Se ejecuto el requerimiento 3")
+        menor1 = float(input("Ingrese el rango menor de Instrumentalness: "))
+        mayor1 = float(input("Ingrese el rango mayor de Instrumentalness: "))
+        menor2 = float(input("Ingrese el rango menor de Tempo: "))
+        mayor2 = float(input("Ingrese el rango mayor de Tempo: "))
+        #
+        menor1, mayor1, menor2, mayor2 = 0.6, 0.9, 40.0, 60.0 
+        #
+        respuesta = controller.requerimiento3(catalog, menor1, mayor1, menor2, mayor2)
+        
+        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1])
+        print("\nSe ejecutó el requerimiento 3\n")
+
+
     elif int(inputs[0]) == 6:
-        print("Se ejecuto el requerimiento 4")
+        print("Se ejecutó el requerimiento 4")
     elif int(inputs[0]) == 7:
-        print("Se ejecuto el requerimiento 5")
+        print("Se ejecutó el requerimiento 5")
     else:
         sys.exit(0)
 sys.exit(0)

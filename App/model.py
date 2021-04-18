@@ -214,34 +214,69 @@ def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
     """
     Retorna el numero de crimenes en un rago de fechas.
     """
-    mapa = om.newMap('RBT')
+    mapa_energy = om.newMap('RBT')
     lst = om.values(catalog['energy'], menor1, mayor1)
-    eventos = 0
-    for lstdate in lt.iterator(lst):
-        eventos += lt.size(lstdate['eventos'])
-        for e in lt.iterator(lstdate['eventos']):
-            om.put(mapa, e['track_id'], (e['energy'], e['danceability']))
 
-    canciones = om.keySet(mapa)
-    print(canciones)
+    for lstdate in lt.iterator(lst):
+        for e in lt.iterator(lstdate['eventos']):
+            om.put(mapa_energy, e['track_id'], (e['energy'], e['danceability']))
+    #mapa_energy = {"1c8b0f2a8d7b1af0ed5af2fcd6f084e1": (0.65, 0.78)}
+
+    canciones = om.keySet(mapa_energy)
+    #canciones = ["34234532fgfdgfdhg45., esfsadfsdafsadf3455, ..."]
 
     seleccionadas = om.newMap('RBT')
     for cancion in lt.iterator(canciones):
-        energy = (me.getValue(om.get(mapa, cancion)))[0]
-        dance = (me.getValue(om.get(mapa, cancion)))[1]
+        energy = (me.getValue(om.get(mapa_energy, cancion)))[0]
+        dance = (me.getValue(om.get(mapa_energy, cancion)))[1]
         if dance <= mayor2 and dance >= menor2:
             om.put(seleccionadas, cancion, (energy, dance))
-    #print(seleccionadas)
+    #seleccionadas = {"1c8b0f2a8d7b1af0ed5af2fcd6f084e1": (0.65, 0.78)}
     tamaño = om.size(seleccionadas) 
 
-    aleatorias = om.newMap('RBT')
-    for i in range(5):
-        a = random.randrange(tamaño)
-        llave = om.select(seleccionadas, a)
-        valor = me.getValue(om.get(mapa, cancion))
-        om.put(aleatorias, llave, valor)
+    mapa_aleatorias = om.newMap('RBT')
+    lista_cinco_aleatorios = random.sample(range(tamaño), 5)
 
-    return tamaño, aleatorias
+    for i in lista_cinco_aleatorios:
+        llave_aleatoria = om.select(seleccionadas, i)
+        valor = me.getValue(om.get(mapa_energy, llave_aleatoria))
+        om.put(mapa_aleatorias, llave_aleatoria, valor)
+
+    return tamaño, mapa_aleatorias
+
+
+def requerimiento3(catalog, menor1, mayor1, menor2, mayor2):
+    """
+    Retorna el numero de crimenes en un rago de fechas.
+    """
+    mapa_instrumentalness = om.newMap('RBT')
+    lst = om.values(catalog['instrumentalness'], menor1, mayor1)
+
+    for lstdate in lt.iterator(lst):
+        for e in lt.iterator(lstdate['eventos']):
+            om.put(mapa_instrumentalness, e['track_id'], (e['instrumentalness'], e['tempo']))
+
+    canciones = om.keySet(mapa_instrumentalness)
+
+    seleccionadas = om.newMap('RBT')
+    for cancion in lt.iterator(canciones):
+        instrumental = (me.getValue(om.get(mapa_instrumentalness, cancion)))[0]
+        tempo = (me.getValue(om.get(mapa_instrumentalness, cancion)))[1]
+        if tempo <= mayor2 and tempo >= menor2:
+            om.put(seleccionadas, cancion, (instrumental, tempo))
+
+    tamaño = om.size(seleccionadas) 
+
+    mapa_aleatorias = om.newMap('RBT')
+
+    lista_cinco_aleatorios = random.sample(range(tamaño), 5)
+
+    for i in lista_cinco_aleatorios:
+        llave_aleatoria = om.select(seleccionadas, i)
+        valor = me.getValue(om.get(mapa_instrumentalness, llave_aleatoria))
+        om.put(mapa_aleatorias, llave_aleatoria, valor)
+
+    return tamaño, mapa_aleatorias
 
 
 
