@@ -28,9 +28,11 @@
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
+from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
+import random
 
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
@@ -39,11 +41,209 @@ los mismos.
 
 # Construccion de modelos
 
+def newAnalyzer():
+    """ Inicializa el analizador
+
+    Crea una lista vacia para guardar todos los crimenes
+    Se crean indices (Maps) por los siguientes criterios:
+    -Fechas
+
+    Retorna el analizador inicializado.
+    """
+#11
+    catalog = {'instrumentalness': None,
+                'liveness': None,
+                "speechiness": None,
+                "danceability": None,
+                "valence": None,
+                "loudness": None,
+                "tempo": None,
+                "acousticness": None,
+                "energy": None,
+                "mode": None,
+                "key": None
+                }
+
+    catalog['instrumentalness'] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog['liveness'] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["speechiness"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["danceability"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["valence"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["loudness"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["tempo"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["acousticness"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["energy"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["mode"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    catalog["key"] = om.newMap(omaptype='RBT',
+                                      comparefunction=None)
+    return catalog
+
+
 # Funciones para agregar informacion al catalogo
 
-# Funciones para creacion de datos
+def addEvento(catalog, evento):
+
+    addEventoInstrumentalness1(catalog, evento, 'instrumentalness')
+    addEventoInstrumentalness1(catalog, evento, 'liveness')
+    addEventoInstrumentalness1(catalog, evento, 'speechiness')
+    addEventoInstrumentalness1(catalog, evento, 'danceability')
+    addEventoInstrumentalness1(catalog, evento, 'valence')
+    addEventoInstrumentalness1(catalog, evento, 'loudness')
+    addEventoInstrumentalness1(catalog, evento, 'tempo')
+    addEventoInstrumentalness1(catalog, evento, 'acousticness')
+    addEventoInstrumentalness1(catalog, evento, 'energy')
+    addEventoInstrumentalness1(catalog, evento, 'mode')
+    addEventoInstrumentalness1(catalog, evento, 'key')
+    
+"""
+def addEventoInstrumentalness(catalog, evento):
+
+    countries_map = catalog['instrumentalness']
+ 
+    pubcountry = evento['instrumentalness']
+
+    existcountry = om.contains(countries_map, pubcountry)
+
+    if existcountry:
+        entry = om.get(countries_map, pubcountry)
+        country_values = me.getValue(entry)
+    else:
+        country_values = newCountry(pubcountry)
+        om.put(countries_map, pubcountry, country_values)
+    lt.addLast(country_values['eventos'], evento) 
+ 
+
+def newCountry(pubcountry):
+    
+    entry = {'instrumentalness': "", "eventos": None}
+    entry['instrumentalness'] = pubcountry
+    entry['eventos'] = lt.newList('ARRAY_LIST')
+    return entry
+"""
+
+
+
+def addEventoInstrumentalness1(catalog, evento, CARACTERISTICA):
+    """
+    Esta funcion adiciona un video a la lista de videos.
+    Los países se guardan en un Map, donde la llave es el país
+    y el valor la lista de videos de ese país.
+    """
+
+    countries_map = catalog[CARACTERISTICA]
+ 
+    pubcountry = evento[CARACTERISTICA]
+
+    existcountry = om.contains(countries_map, pubcountry)
+
+    if existcountry:
+        entry = om.get(countries_map, pubcountry)
+        country_values = me.getValue(entry)
+    else:
+        country_values = newCountry1(pubcountry, CARACTERISTICA)
+        om.put(countries_map, pubcountry, country_values)
+    lt.addLast(country_values['eventos'], evento) 
+ 
+
+def newCountry1(pubcountry, CARACTERISTICA):
+    """
+    Esta funcion crea la estructura de videos asociados
+    a un año.
+    """
+    entry = {CARACTERISTICA: "", "eventos": None}
+    entry[CARACTERISTICA] = pubcountry
+    entry['eventos'] = lt.newList('ARRAY_LIST')
+    return entry
+
 
 # Funciones de consulta
+
+def indexHeight(analyzer):
+    """
+    Altura del arbol
+    """
+    return om.height(analyzer['instrumentalness'])
+
+
+def indexSize(analyzer):
+    """
+    Numero de elementos en el indice
+    """
+    return om.size(analyzer['instrumentalness'])
+
+
+def minKey(analyzer):
+    """
+    Llave mas pequena
+    """
+    return om.minKey(analyzer['instrumentalness'])
+
+
+def maxKey(analyzer):
+    """
+    Llave mas grande
+    """
+    return om.maxKey(analyzer['instrumentalness'])
+
+def requerimiento1(catalog, menor, mayor, caracteristica):
+    """
+    Retorna el numero de crimenes en un rago de fechas.
+    """
+    mapa = om.newMap('RBT')
+    lst = om.values(catalog[caracteristica], menor, mayor)
+    eventos = 0
+    for lstdate in lt.iterator(lst):
+        eventos += lt.size(lstdate['eventos'])
+        for e in lt.iterator(lstdate['eventos']):
+            om.put(mapa, e['artist_id'], "Maria José")
+    tamaño_mapa = om.size(mapa)
+    return eventos, tamaño_mapa
+
+
+def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
+    """
+    Retorna el numero de crimenes en un rago de fechas.
+    """
+    mapa = om.newMap('RBT')
+    lst = om.values(catalog['energy'], menor1, mayor1)
+    eventos = 0
+    for lstdate in lt.iterator(lst):
+        eventos += lt.size(lstdate['eventos'])
+        for e in lt.iterator(lstdate['eventos']):
+            om.put(mapa, e['track_id'], (e['energy'], e['danceability']))
+
+    canciones = om.keySet(mapa)
+    print(canciones)
+
+    seleccionadas = om.newMap('RBT')
+    for cancion in lt.iterator(canciones):
+        energy = (me.getValue(om.get(mapa, cancion)))[0]
+        dance = (me.getValue(om.get(mapa, cancion)))[1]
+        if dance <= mayor2 and dance >= menor2:
+            om.put(seleccionadas, cancion, (energy, dance))
+    #print(seleccionadas)
+    tamaño = om.size(seleccionadas) 
+
+    aleatorias = om.newMap('RBT')
+    for i in range(5):
+        a = random.randrange(tamaño)
+        llave = om.select(seleccionadas, a)
+        valor = me.getValue(om.get(mapa, cancion))
+        om.put(aleatorias, llave, valor)
+
+    return tamaño, aleatorias
+
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
