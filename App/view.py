@@ -58,18 +58,26 @@ def loadData(catalog):
     """
     return controller.loadData(catalog)
 
-def printReq2_3(menor1, mayor1, menor2, mayor2, numero, mapa):
+def printReq2_3(menor1, mayor1, menor2, mayor2, numero, mapa, req):
 
-    print('\n++++++ Req No. 2 results... ++++++')
-    print('Energy is between '+str(menor1)+' and '+str(mayor1))
-    print('Danceability is between '+str(menor2)+' and '+str(mayor2))
+    if req == 2:
+        parametro1 = 'Energy'
+        parametro2 = 'Danceability'
+    else:
+        parametro1 = 'Instrumentalness'
+        parametro2 = 'Tempo'
+
+    print('\n++++++ Req No. '+str(req)+' results... ++++++')
+    print(parametro1+' is between '+str(menor1)+' and '+str(mayor1))
+    print(parametro2+' is between '+str(menor2)+' and '+str(mayor2))
     print('Total of unique tracks in events: '+str(numero)+"\n")
 
+    print('--- Unique track_id ---')
     lista_llaves = om.keySet(mapa)
     n = 1
     for llave in lt.iterator(lista_llaves):
         valor = me.getValue(om.get(mapa, llave))
-        print('Track '+str(n)+': '+str(llave)+' with energy of '+str(valor[0])+' and danceability of '+str(valor[1]))
+        print('Track '+str(n)+': '+str(llave)+' with '+parametro1.lower()+' of '+str(valor[0])+' and '+parametro2.lower()+' of '+str(valor[1]))
         n += 1
 
 catalog = None
@@ -118,7 +126,7 @@ while True:
         menor1, mayor1, menor2, mayor2 = 0.5, 0.75, 0.75, 1 
         respuesta = controller.requerimiento2(catalog, menor1, mayor1, menor2, mayor2)
         
-        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1])
+        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1], 2)
         print("\nSe ejecutó el requerimiento 2\n")
 
 
@@ -132,7 +140,7 @@ while True:
         #
         respuesta = controller.requerimiento3(catalog, menor1, mayor1, menor2, mayor2)
         
-        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1])
+        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1], 3)
         print("\nSe ejecutó el requerimiento 3\n")
 
 

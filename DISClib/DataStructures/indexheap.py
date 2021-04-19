@@ -30,7 +30,7 @@ orientada a menor
 """
 
 
-def newIndexHeap(cmpfunction):
+    def newIndexHeap(cmpfunction):
     """
     Crea un cola de prioridad indexada orientada a menor
 
