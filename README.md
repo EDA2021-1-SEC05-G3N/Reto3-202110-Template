@@ -1,4 +1,4 @@
-# ISIS1225 - Reto 2
+# ISIS1225 - Reto 3
 
 * Req. 2 - Eduardo José Herrera Alba, 201912865, ej.herrera@uniandes.edu.co
 * Req. 3 - María José Cely Ortiz, 202011803, m.cely@uniandes.edu.co
