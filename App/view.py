@@ -27,7 +27,9 @@ from DISClib.ADT import list as lt
 assert cf
 import model
 from DISClib.ADT import orderedmap as om
+from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
+import datetime
 
 """
 La vista se encarga de la interacción con el usuario
@@ -79,6 +81,83 @@ def printReq2_3(menor1, mayor1, menor2, mayor2, numero, mapa, req):
         valor = me.getValue(om.get(mapa, llave))
         print('Track '+str(n)+': '+str(llave)+' with '+parametro1.lower()+' of '+str(valor[0])+' and '+parametro2.lower()+' of '+str(valor[1]))
         n += 1
+
+def crear_mapa_generos (cantidad_generos, nuevo_genero):
+    mapa_generos = om.newMap()
+
+    for i in range(cantidad_generos):
+        if i == cantidad_generos-1 and (nuevo_genero in "sísiSíSiSISÍ"):
+            nuevo = input("Ingrese el género musical nuevo: ")
+            menor = float(input("Ingrese el rango menor de Tempo: "))
+            mayor = float(input("Ingrese el rango mayor de Tempo: "))
+        else:
+            nuevo = input("Ingrese el género musical #"+str(i+1)+": ")
+
+            if nuevo == "Reggae":
+                menor, mayor = 60, 90
+            elif nuevo == "Down-tempo":
+                menor, mayor = 70, 100
+            elif nuevo == "Chill-out":
+                menor, mayor = 90, 120
+            elif nuevo == "Hip-hop":
+                menor, mayor = 85, 115
+            elif nuevo == "Jazz and Funk":
+                menor, mayor = 120, 125
+            elif nuevo == "Pop":
+                menor, mayor = 100, 130
+            elif nuevo == "R&B":
+                menor, mayor = 60, 80
+            elif nuevo == "Rock":
+                menor, mayor = 110, 140
+            elif nuevo == "Metal":
+                menor, mayor = 100, 160
+        
+        om.put(mapa_generos, nuevo, (menor, mayor))
+
+    return mapa_generos
+
+def printReq4 (respuesta):
+    print('\n++++++ Req No. 4 results... +++++\n'+'Total of reproductions: '+str(respuesta[1]))
+    for i in lt.iterator(om.keySet(respuesta[0])):
+        eventos, tamaño_mapa, mapa, menor, mayor = me.getValue(om.get(mapa_generos, i))
+        print("\n========"+" "+i+" "+"========")
+        print("For "+i+" the tempo is between "+str(menor)+" and "+str(mayor)+" BPM")
+        print(i+" reproductions: "+str(eventos)+" with "+str(tamaño_mapa)+" different artists")
+        print("-----"+" Some artists for "+i+" "+"-----")
+        n = 1
+        for artista in lt.iterator(om.keySet(mapa)):
+            print('Artist '+str(n)+': '+str(artista))
+            n += 1
+            if n == 11:
+                break
+
+def printReq5 (respuesta, horamin, horamax):
+    print("\n++++++ Req No. 5 results... ++++++")
+    print("There is a total of "+str(respuesta[0][1])+" reproductions between "+str(horamin)+" and "+str(horamax))
+    print("====================== GENRES SORTED REPRODUCTIONS ======================")
+    for i in range(1,10):
+        lista_pequeña = lt.getElement(respuesta[0][0], i)
+        genero = lt.firstElement(lista_pequeña)
+        eventos = lt.lastElement(lista_pequeña)
+        print("TOP "+str(i)+": "+str(genero)+" with "+str(eventos)+" reps")
+    lista_mayor = lt.firstElement(respuesta[0][0])
+    genero_mayor = lt.firstElement(lista_mayor)
+    eventos_mayor = lt.lastElement(lista_mayor)
+    print("\nThe TOP GENRE is "+str(genero_mayor)+" with "+str(eventos_mayor)+" reproductions")
+
+    print("========================== "+str(genero_mayor)+" SENTIMENT ANALYSIS =========================")
+    print(str(genero_mayor)+" has "+str(respuesta[1][1])+" unique tracks...")
+    print("The first TOP 10 tracks are...\n")
+    
+    i = 0
+    for cada_lista in lt.iterator(respuesta[1][0]):
+        cancion = lt.getElement(cada_lista, 1)
+        promedio = lt.getElement(cada_lista, 2)
+        hashtags = lt.getElement(cada_lista, 3)
+        i += 1
+        print("TOP "+str(i)+" track: "+str(cancion)+" with hashtags "+str(hashtags)+
+            " and VADER = "+str(promedio))
+
 
 catalog = None
 
@@ -144,10 +223,31 @@ while True:
         print("\nSe ejecutó el requerimiento 3\n")
 
 
-    elif int(inputs[0]) == 6:
-        print("Se ejecutó el requerimiento 4")
+    elif int(inputs[0]) == 6:   
+        cantidad_generos = int(input("¿Cuántos generos desea buscar? "))
+        nuevo_genero = input("¿Desea añadir un nuevo género? ")
+        mapa_generos = crear_mapa_generos(cantidad_generos, nuevo_genero)
+
+        respuesta = controller.requerimiento4(catalog, mapa_generos)
+        printReq4(respuesta)
+
+        print("\nSe ejecutó el requerimiento 4\n")
+
+
     elif int(inputs[0]) == 7:
-        print("Se ejecutó el requerimiento 5")
+        #horamin = datetime.datetime.strptime((input("Ingrese el valor mínimo de la hora: ")), '%H:%M:%S').time()
+        #horamax = datetime.datetime.strptime((input("Ingrese el valor máximo de la hora: ")), '%H:%M:%S').time()
+        #
+        horamin = datetime.datetime.strptime("7:15:00", '%H:%M:%S').time()
+        horamax = datetime.datetime.strptime("9:45:00", '%H:%M:%S').time()
+        #
+        
+        #print(mp.keySet((catalog["track_id"])))
+        respuesta = controller.requerimiento5(catalog, horamin, horamax)
+        #print(respuesta[1])
+        printReq5(respuesta, horamin, horamax)
+
+        print("\nSe ejecutó el requerimiento 5\n")
     else:
         sys.exit(0)
 sys.exit(0)

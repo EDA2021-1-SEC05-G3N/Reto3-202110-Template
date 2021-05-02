@@ -23,7 +23,7 @@
 import config as cf
 import model
 import csv
-
+import datetime
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -44,7 +44,8 @@ def initCatalog():
 def loadData(catalog):
 
     loadEventos(catalog)
-
+    loadTracks(catalog)
+    loadHashtags(catalog)
 
 def loadEventos(catalog):
     """
@@ -58,20 +59,41 @@ def loadEventos(catalog):
     input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
     for evento in input_file:
         cada_evento = {"instrumentalness": float(evento["instrumentalness"]),
-                  "liveness": float(evento["liveness"]),
-                  "speechiness": float(evento["speechiness"]),
                   "danceability": float(evento["danceability"]),
-                  "valence": float(evento["valence"]),
-                  "loudness": float(evento["loudness"]),
                   "tempo": float(evento["tempo"]),
-                  "acousticness": float(evento["acousticness"]),
                   "energy": float(evento["energy"]),
-                  "mode": float(evento["mode"]),
-                  "key": float(evento["key"]),
                   "artist_id": evento["artist_id"],
-                  "track_id": evento["track_id"]}
+                  "track_id": evento["track_id"],
+                  "time": datetime.datetime.strptime(evento["created_at"], '%Y-%m-%d %H:%M:%S').time()
+                  }
                   
         model.addEvento(catalog, cada_evento)
+
+def loadTracks(catalog):
+    
+    videosfile = cf.data_dir + 'user_track_hashtag_timestamp-small.csv '
+    
+    input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
+    for evento in input_file:
+        cada_evento = {"track_id": evento["track_id"], 
+                    "hashtag": evento["hashtag"].lower()
+                    }
+        model.addTrack(catalog, cada_evento)
+
+def loadHashtags(catalog):
+    
+    videosfile = cf.data_dir + 'sentiment_values.csv '
+    
+    input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
+    for hashtag in input_file:
+        try:
+            cada_hashtag = {"hashtag": hashtag["hashtag"].lower(), 
+                        "vader_avg": float(hashtag["vader_avg"])
+                        }
+            model.addHashtag(catalog, cada_hashtag)
+        except:
+            pass
+
 
 def indexHeight(analyzer):
     """
@@ -108,6 +130,15 @@ def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
 
 def requerimiento3(catalog, menor1, mayor1, menor2, mayor2):
     return model.requerimiento3(catalog, menor1, mayor1, menor2, mayor2)
-# Funciones de ordenamiento
+
+def requerimiento4(catalog, mapa_generos):
+    return model.requerimiento4(catalog, mapa_generos)
+
+def requerimiento5(catalog, horamin, horamax):
+    parte1 = model.requerimiento5_parte1(catalog, horamin, horamax)
+    parte2 = model.requerimiento5_parte2(catalog, parte1[2])
+    bonus = model.requerimiento5_parte2_ANTES(catalog, parte1[2])
+
+    return parte1, parte2
 
 # Funciones de consulta sobre el catálogo

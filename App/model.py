@@ -31,6 +31,7 @@ from DISClib.ADT import map as mp
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
+from DISClib.Algorithms.Sorting import mergesort as mg
 assert cf
 import random
 
@@ -52,40 +53,32 @@ def newAnalyzer():
     """
 #11
     catalog = {'instrumentalness': None,
-                'liveness': None,
-                "speechiness": None,
                 "danceability": None,
-                "valence": None,
-                "loudness": None,
                 "tempo": None,
-                "acousticness": None,
                 "energy": None,
-                "mode": None,
-                "key": None
+
+                "time": None,
+
+                "track_id": None,
+                "hashtag": None
                 }
 
     catalog['instrumentalness'] = om.newMap(omaptype='RBT',
                                       comparefunction=None)
-    catalog['liveness'] = om.newMap(omaptype='RBT',
-                                      comparefunction=None)
-    catalog["speechiness"] = om.newMap(omaptype='RBT',
-                                      comparefunction=None)
     catalog["danceability"] = om.newMap(omaptype='RBT',
-                                      comparefunction=None)
-    catalog["valence"] = om.newMap(omaptype='RBT',
-                                      comparefunction=None)
-    catalog["loudness"] = om.newMap(omaptype='RBT',
                                       comparefunction=None)
     catalog["tempo"] = om.newMap(omaptype='RBT',
                                       comparefunction=None)
-    catalog["acousticness"] = om.newMap(omaptype='RBT',
-                                      comparefunction=None)
     catalog["energy"] = om.newMap(omaptype='RBT',
                                       comparefunction=None)
-    catalog["mode"] = om.newMap(omaptype='RBT',
+
+    catalog["time"] = om.newMap(omaptype='RBT',
                                       comparefunction=None)
-    catalog["key"] = om.newMap(omaptype='RBT',
-                                      comparefunction=None)
+
+    catalog["track_id"] = mp.newMap()
+
+    catalog["hashtag"] = mp.newMap()
+
     return catalog
 
 
@@ -94,42 +87,78 @@ def newAnalyzer():
 def addEvento(catalog, evento):
 
     addEventoInstrumentalness1(catalog, evento, 'instrumentalness')
-    addEventoInstrumentalness1(catalog, evento, 'liveness')
-    addEventoInstrumentalness1(catalog, evento, 'speechiness')
     addEventoInstrumentalness1(catalog, evento, 'danceability')
-    addEventoInstrumentalness1(catalog, evento, 'valence')
-    addEventoInstrumentalness1(catalog, evento, 'loudness')
     addEventoInstrumentalness1(catalog, evento, 'tempo')
-    addEventoInstrumentalness1(catalog, evento, 'acousticness')
     addEventoInstrumentalness1(catalog, evento, 'energy')
-    addEventoInstrumentalness1(catalog, evento, 'mode')
-    addEventoInstrumentalness1(catalog, evento, 'key')
+    addEventoInstrumentalness1(catalog, evento, 'time')
     
-"""
-def addEventoInstrumentalness(catalog, evento):
+def addTrack(catalog, evento):
 
-    countries_map = catalog['instrumentalness']
- 
-    pubcountry = evento['instrumentalness']
+    mapa_tracks = catalog["track_id"]
 
-    existcountry = om.contains(countries_map, pubcountry)
-
-    if existcountry:
-        entry = om.get(countries_map, pubcountry)
-        country_values = me.getValue(entry)
+    if mp.contains(mapa_tracks, evento["track_id"]):
+        mapa_hashtags = me.getValue(mp.get(mapa_tracks, evento["track_id"]))
+        mp.put(mapa_hashtags, evento["hashtag"], None)
+        
     else:
-        country_values = newCountry(pubcountry)
-        om.put(countries_map, pubcountry, country_values)
-    lt.addLast(country_values['eventos'], evento) 
+        nuevo_mapa_hashtags = mp.newMap()
+        mp.put(mapa_tracks, evento[0], nuevo_mapa_hashtags)
+
+def addHashtag(catalog, hashtag):
+
+    mapa_hashtags = catalog["hashtag"]
+
+    mp.put(mapa_hashtags, hashtag["hashtag"], hashtag["vader_avg"])
+
+###
+def addTrack(catalog, evento):
+
+    track_map = catalog['track_id']
+ 
+    track_id = evento['track_id']
+
+    existtrack = mp.contains(track_map, track_id)
+
+    if existtrack:
+        hashtags = me.getValue(mp.get(track_map, track_id))
+    else:
+        hashtags = newTrack(track_id)
+        mp.put(track_map, track_id, hashtags)
+    mp.put(hashtags['eventos'], evento["hashtag"], None) 
  
 
-def newCountry(pubcountry):
+def newTrack(track_id):
     
-    entry = {'instrumentalness': "", "eventos": None}
-    entry['instrumentalness'] = pubcountry
-    entry['eventos'] = lt.newList('ARRAY_LIST')
+    entry = {'track_id': "", "eventos": None}
+    entry['track_id'] = track_id
+    entry['eventos'] = mp.newMap()
     return entry
-"""
+###
+
+
+
+
+def addHashtag(catalog, evento):
+
+    hashtag_map = catalog['hashtag']
+ 
+    hashtag = evento['hashtag']
+
+    existhashtag = mp.contains(hashtag_map, hashtag)
+
+    if not existhashtag:
+        hashtags = newHashtag(evento)
+        mp.put(hashtag_map, hashtag, hashtags)
+
+
+def newHashtag(evento):
+    
+    entry = {'hashtag': "", "vader_avg": None}
+    entry['hashtag'] = evento["hashtag"]
+    entry['vader_avg'] = evento["vader_avg"]
+    return entry
+
+
 
 
 
@@ -152,7 +181,7 @@ def addEventoInstrumentalness1(catalog, evento, CARACTERISTICA):
     else:
         country_values = newCountry1(pubcountry, CARACTERISTICA)
         om.put(countries_map, pubcountry, country_values)
-    lt.addLast(country_values['eventos'], evento) 
+    lt.addLast(country_values['eventos'], evento)
  
 
 def newCountry1(pubcountry, CARACTERISTICA):
@@ -196,9 +225,7 @@ def maxKey(analyzer):
     return om.maxKey(analyzer['instrumentalness'])
 
 def requerimiento1(catalog, menor, mayor, caracteristica):
-    """
-    Retorna el numero de crimenes en un rago de fechas.
-    """
+
     mapa = om.newMap('RBT')
     lst = om.values(catalog[caracteristica], menor, mayor)
     eventos = 0
@@ -207,7 +234,8 @@ def requerimiento1(catalog, menor, mayor, caracteristica):
         for e in lt.iterator(lstdate['eventos']):
             om.put(mapa, e['artist_id'], "Maria José")
     tamaño_mapa = om.size(mapa)
-    return eventos, tamaño_mapa
+
+    return eventos, tamaño_mapa, mapa
 
 
 def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
@@ -232,11 +260,15 @@ def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
         if dance <= mayor2 and dance >= menor2:
             om.put(seleccionadas, cancion, (energy, dance))
     #seleccionadas = {"1c8b0f2a8d7b1af0ed5af2fcd6f084e1": (0.65, 0.78)}
+   
+    # Se obtiene el tamaño del mapa
     tamaño = om.size(seleccionadas) 
-
-    mapa_aleatorias = om.newMap('RBT')
+    # Se obtiene una lista con cinco números aleatorios diferentes 
+    # que estén dentro del rango del tamaño 
     lista_cinco_aleatorios = random.sample(range(tamaño), 5)
 
+    # Se crea un mapa para guardar las llaves aleatorias y sus valores
+    mapa_aleatorias = om.newMap('RBT')
     for i in lista_cinco_aleatorios:
         llave_aleatoria = om.select(seleccionadas, i)
         valor = me.getValue(om.get(mapa_energy, llave_aleatoria))
@@ -278,8 +310,265 @@ def requerimiento3(catalog, menor1, mayor1, menor2, mayor2):
 
     return tamaño, mapa_aleatorias
 
+def requerimiento4(catalog, mapa_generos):
+
+    eventos_total = 0
+
+    for i in lt.iterator(om.keySet(mapa_generos)):
+
+        menor = me.getValue(om.get(mapa_generos, i))[0]
+        mayor = me.getValue(om.get(mapa_generos, i))[1]
+        eventos, tamaño_mapa, mapa = requerimiento1(catalog, menor, mayor, 'tempo')
+        om.put(mapa_generos, i, (eventos, tamaño_mapa,  mapa, menor, mayor))
+        eventos_total += eventos
+
+    return mapa_generos, eventos_total
+
+def requerimiento5_parte1(catalog, horamin, horamax):
+
+    lista_horas =  om.values(catalog['time'], horamin, horamax)
+    mapa_generos = mp.newMap(numelements= 10)
+
+    conteo_total, conteo_0, conteo_1, conteo_2, conteo_3 = 0, 0, 0, 0, 0
+    conteo_4, conteo_5, conteo_6, conteo_7, conteo_8 = 0, 0, 0, 0, 0
+
+
+    for lst in lt.iterator(lista_horas):
+        for e in lt.iterator(lst['eventos']):
+            
+            if e["tempo"] >= 60 and e["tempo"] <= 90:
+                if mp.contains(mapa_generos, "Reggae"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Reggae"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Reggae", nueva_lista_eventos)
+                conteo_0 += 1
+
+            if e["tempo"] >= 70 and e["tempo"] <= 100:
+                if mp.contains(mapa_generos, "Down-tempo"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Down-tempo"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Down-tempo", nueva_lista_eventos)
+                conteo_1 += 1
+
+            if e["tempo"] >= 90 and e["tempo"] <= 120:
+                if mp.contains(mapa_generos, "Chill-out"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Chill-out"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Chill-out", nueva_lista_eventos)
+                conteo_2 += 1
+
+            if e["tempo"] >= 85 and e["tempo"] <= 115:
+                if mp.contains(mapa_generos, "Hip-hop"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Hip-hop"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Hip-hop", nueva_lista_eventos)
+                conteo_3 += 1
+
+            if e["tempo"] >= 120 and e["tempo"] <= 125:
+                if mp.contains(mapa_generos, "Jazz and Funk"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Jazz and Funk"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Jazz and Funk", nueva_lista_eventos)
+                conteo_4 += 1
+
+            if e["tempo"] >= 100 and e["tempo"] <= 130:
+                if mp.contains(mapa_generos, "Pop"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Pop"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Pop", nueva_lista_eventos)
+                conteo_5 += 1
+
+            if e["tempo"] >= 60 and e["tempo"] <= 80:
+                if mp.contains(mapa_generos, "R&B"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "R&B"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "R&B", nueva_lista_eventos)
+                conteo_6 += 1
+
+            if e["tempo"] >=110 and e["tempo"] <= 140:
+                if mp.contains(mapa_generos, "Rock"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Rock"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Rock", nueva_lista_eventos)
+                conteo_7 += 1
+
+            if e["tempo"] >= 100 and e["tempo"] <= 160:
+                if mp.contains(mapa_generos, "Metal"):
+                    lista_eventos = me.getValue(mp.get(mapa_generos, "Metal"))
+                    lt.addLast(lista_eventos, e)
+                else:
+                    nueva_lista_eventos = lt.newList("ARRAY_LIST")
+                    mp.put(mapa_generos, "Metal", nueva_lista_eventos)
+                conteo_8 += 1
+
+    conteo_total = conteo_0 + conteo_1 + conteo_2 + conteo_3 + conteo_4 
+    conteo_total += conteo_5 + conteo_6 + conteo_7 + conteo_8        
+
+    lista_final = lt.newList('ARRAY_LIST')
+    for i in range(9):
+        if i == 0:
+            genero = "Reggae"
+            conteo = conteo_0
+        elif i == 1:
+            genero = "Down-tempo"
+            conteo = conteo_1
+        elif i == 2:
+            genero = "Chill-out"
+            conteo = conteo_2
+        elif i == 3:
+            genero = "Hip-hop"
+            conteo = conteo_3
+        elif i == 4:
+            genero = "Jazz and Funk"
+            conteo = conteo_4
+        elif i == 5:
+            genero = "Pop"
+            conteo = conteo_5
+        elif i == 6:
+            genero = "R&B"
+            conteo = conteo_6
+        elif i == 7:
+            genero = "Rock"
+            conteo = conteo_7
+        elif i == 8:
+            genero = "Metal"
+            conteo = conteo_8
+
+        lista_pequeña = lt.newList("ARRAY_LIST")
+        lt.addLast(lista_pequeña, genero)
+        lt.addLast(lista_pequeña, conteo)
+        lt.addLast(lista_final, lista_pequeña)
+
+    #Se ordena la lista de generos y número de eventos
+    lista_final = SortGeneros(lista_final)
+    
+    #Se saca la lista de eventos del género con mayor eventos
+    genero_mayor = lt.firstElement(lt.firstElement(lista_final))
+    lista_genero_mayor = me.getValue(mp.get(mapa_generos, genero_mayor))
+
+    return lista_final, conteo_total, lista_genero_mayor
+
+
+def requerimiento5_parte2_ANTES(catalog, lista_genero_mayor):
+    
+    mapa_final = mp.newMap()
+
+
+    for e in lt.iterator(lista_genero_mayor):
+        cancion = e["track_id"]
+        promedio, cantidad_hashtags = GetVaderProm(catalog, cancion)
+        mp.put(mapa_final, cancion, (promedio, cantidad_hashtags))
+
+    print(mp.size(mapa_final))
+
+    return mapa_final
+
+def requerimiento5_parte2(catalog, lista_genero_mayor):
+    
+    # Se crea un mapa para guardar los track_id y contar sin repeticiones
+    mapa_final = mp.newMap()
+
+    for e in lt.iterator(lista_genero_mayor):
+        cancion = e["track_id"]
+        mp.put(mapa_final, cancion, "Hola")
+    
+    tamaño_mapa = mp.size(mapa_final)
+
+
+    # Se obtiene el tamaño de la lista
+    tamaño_lista = lt.size(lista_genero_mayor) 
+
+    # Se obtiene una lista con diez números aleatorios diferentes 
+    # que estén dentro del rango del tamaño 
+    lista_diez_aleatorios = random.sample(range(tamaño_lista), 10)
+
+    # Se crea una lista para guardar listas [track_id, promedio, cantidad_hashtags]
+    lista_final = lt.newList()
+
+    # Se agregan diez eventos aleatorios a la lista
+    for i in lista_diez_aleatorios:
+        e_aleatorio = lt.getElement(lista_genero_mayor, i)
+        cancion = e_aleatorio["track_id"]
+        promedio, cantidad_hashtags = GetVaderProm(catalog, cancion)
+        lista_pequeña = lt.newList()
+        lt.addLast(lista_pequeña, cancion)
+        lt.addLast(lista_pequeña, promedio)
+        lt.addLast(lista_pequeña, cantidad_hashtags)
+        lt.addLast(lista_final, lista_pequeña)
+
+    lista_final = SortByHashtags(lista_final)
+
+    return lista_final, tamaño_mapa
+
+def GetVaderProm(catalog, cancion):
+    """
+    Obtiene el promedio de los vader_avg de los hashtags de una canción.
+    """
+    
+    #Busca los hashtags de la canción
+    mapa_hashtags = me.getValue(mp.get(catalog["track_id"], cancion))
+    lista_hashtags = mp.keySet(mapa_hashtags["eventos"])
+    cantidad_hashtags = lt.size(lista_hashtags)
+    promedio = 0
+
+    for h in lt.iterator(lista_hashtags):
+        a = mp.get(catalog["hashtag"], h)
+        if a != None:
+            promedio += me.getValue(a)["vader_avg"]
+
+    promedio /= lt.size(lista_hashtags)
+
+    return round(promedio, 1), cantidad_hashtags
+
+
+# Funciones de ordenamiento
+
+#5.1
+def SortGeneros (lista):
+    """
+    Toma la lista de listas [genero, eventos_genero] y ordena 
+    de mayor de a menor eventos_genero
+    """
+    return mg.sort(lista, cmpEventosGenero)
+
+#5.2
+def SortByHashtags (lista):
+    """
+    Toma la lista de listas [track_id, promedio, cantidad_hashtags] y ordena 
+    de mayor de a menor eventos_genero
+    """
+    return mg.sort(lista, cmpHashtags)
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
-# Funciones de ordenamiento
+#5.1
+def cmpEventosGenero (lista1, lista2):
+    """
+    Compara dos listas [genero, eventos_genero] por eventos_genero
+    """
+    return lt.lastElement(lista1) > lt.lastElement(lista2)  
+
+#5.2
+def cmpHashtags (lista1, lista2):
+    """
+    Compara dos listas [track_id, promedio, cantidad_hashtags] por 
+    cantidad_hashtags
+    """
+    return lt.lastElement(lista1) > lt.lastElement(lista2)  
