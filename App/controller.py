@@ -29,15 +29,17 @@ import datetime
 El controlador se encarga de mediar entre la vista y el modelo.
 """
 
+
 # Inicialización del Catálogo de libros
 
 def initCatalog():
     """
-    Llama la funcion de inicializacion  del modelo.
+    Llama la función de inicialización  del modelo.
     """
     # catalog es utilizado para interactuar con el modelo
-    catalog = model.newAnalyzer()
+    catalog = model.newCatalog()
     return catalog
+
 
 # Funciones para la carga de datos
 
@@ -49,11 +51,10 @@ def loadData(catalog):
 
 def loadEventos(catalog):
     """
-    Carga los libros del archivo.  Por cada video se toman los datos necesarios:
-    video id, trending date, category id, views, nombre del canal, país, nombre del 
-    video, likes, dislikes, fecha de publicación, likes y tags.
+    Carga los eventos del archivo. Por cada evento se toma los datos necesarios:
+    instrumentalness,  danceability, tempo, energy, id del artista, id de la pista, 
+    y fecha de publicación.
     """
-    
     videosfile = cf.data_dir + 'context_content_features-small.csv '
     
     input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
@@ -64,13 +65,17 @@ def loadEventos(catalog):
                   "energy": float(evento["energy"]),
                   "artist_id": evento["artist_id"],
                   "track_id": evento["track_id"],
-                  "time": datetime.datetime.strptime(evento["created_at"], '%Y-%m-%d %H:%M:%S').time()
-                  }
-                  
+                  "time": datetime.datetime.strptime(evento["created_at"], '%Y-%m-%d %H:%M:%S').time(),
+                  "user_id": evento["user_id"],
+                  "id": evento["id"]
+                  }       
         model.addEvento(catalog, cada_evento)
 
 def loadTracks(catalog):
-    
+    """
+    Carga la canción de cada evento del archivo. Por cada canción se toma el único
+    dato necesario: el hashtag.
+    """    
     videosfile = cf.data_dir + 'user_track_hashtag_timestamp-small.csv '
     
     input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
@@ -81,7 +86,10 @@ def loadTracks(catalog):
         model.addTrack(catalog, cada_evento)
 
 def loadHashtags(catalog):
-    
+    """
+    Carga los hashtags del archivo. Por cada hashtag se toma el único dato necesario:
+    el vader promedio.
+    """
     videosfile = cf.data_dir + 'sentiment_values.csv '
     
     input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
@@ -95,32 +103,40 @@ def loadHashtags(catalog):
             pass
 
 
-def indexHeight(analyzer):
+# Funciones de consulta sobre el catálogo
+
+def sizeList(catalog, lista):
+    return model.sizeList(catalog, lista)
+
+def sizeMap(catalog, mapa):
+    return model.sizeMap(catalog, mapa)
+
+def indexHeight(catalog):
     """
     Altura del indice (arbol)
     """
-    return model.indexHeight(analyzer)
+    return model.indexHeight(catalog)
 
 
-def indexSize(analyzer):
+def indexSize(catalog):
     """
     Numero de nodos en el arbol
     """
-    return model.indexSize(analyzer)
+    return model.indexSize(catalog)
 
 
-def minKey(analyzer):
+def minKey(catalog):
     """
     La menor llave del arbol
     """
-    return model.minKey(analyzer)
+    return model.minKey(catalog)
 
 
-def maxKey(analyzer):
+def maxKey(catalog):
     """
     La mayor llave del arbol
     """
-    return model.maxKey(analyzer)
+    return model.maxKey(catalog)
 
 def requerimiento1(catalog, menor, mayor, caracteristica):
     return model.requerimiento1(catalog, menor, mayor, caracteristica)
@@ -137,8 +153,4 @@ def requerimiento4(catalog, mapa_generos):
 def requerimiento5(catalog, horamin, horamax):
     parte1 = model.requerimiento5_parte1(catalog, horamin, horamax)
     parte2 = model.requerimiento5_parte2(catalog, parte1[2])
-    bonus = model.requerimiento5_parte2_ANTES(catalog, parte1[2])
-
     return parte1, parte2
-
-# Funciones de consulta sobre el catálogo

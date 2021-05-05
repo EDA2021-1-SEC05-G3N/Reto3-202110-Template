@@ -24,22 +24,22 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
-assert cf
-import model
 from DISClib.ADT import orderedmap as om
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
+assert cf
+import model
 import datetime
 
 """
 La vista se encarga de la interacción con el usuario
-Presenta el menu de opciones y por cada seleccion
+Presenta el menú de opciones y por cada selección
 se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
 
 def printMenu():
-    print("Bienvenido")
+    print("\nBienvenido")
     print("1- Inicializar Analizador")
     print("2- Cargar información en el catálogo")
     print("3- Req. 1: Caracterizar las reproducciones")
@@ -50,15 +50,48 @@ def printMenu():
 
 def initCatalog():
     """
-    Inicializa el catalogo de libros
+    Inicializa el catálogo de eventos
     """
     return controller.initCatalog()
 
 def loadData(catalog):
     """
-    Carga los libros en la estructura de datos
+    Carga los datos en la estructura de datos
     """
     return controller.loadData(catalog)
+
+def printResults(lista_eventos, sample=5):
+    size = lt.size(lista_eventos)
+    if(size > sample):
+        print("\n-Los primeros 5 eventos cargados son: ")
+        i = 1
+        while i <= sample:
+            evento = lt.getElement(lista_eventos, i)
+            print("\nEvento # "+str(i))
+            print("id del evento: "+str(evento["id"]))
+            print("id del user: "+str(evento["user_id"]))
+            print("id de la canción: "+str(evento["track_id"]))
+            print("instrumentalness: "+str(evento["instrumentalness"]))
+            print("danceability: "+str(evento["danceability"]))
+            print("tempo: "+str(evento["tempo"]))
+            i+=1
+        print("\nLos últimos 5 eventos cargados son: ")
+        i = -4
+        while i < 1:
+            evento = lt.getElement(lista_eventos, i)
+            print("\nEvento # "+str(size + i))
+            print("id del evento: "+str(evento["id"]))
+            print("id del user: "+str(evento["user_id"]))
+            print("id de la canción: "+str(evento["track_id"]))
+            print("instrumentalness: "+str(evento["instrumentalness"]))
+            print("danceability: "+str(evento["danceability"]))
+            print("tempo: "+str(evento["tempo"]))
+            i+=1
+
+def printReq1(menor, mayor, respuesta):
+    print('\n++++++ Req No. 1 results... +++++')
+    print('Instrumentalness is between '+str(menor)+' and '+str(mayor))
+    print("Total of reproduction: "+str(respuesta[0])+" Total of unique artists: "+str(respuesta[1]))
 
 def printReq2_3(menor1, mayor1, menor2, mayor2, numero, mapa, req):
 
@@ -137,13 +170,14 @@ def printReq5 (respuesta, horamin, horamax):
     print("====================== GENRES SORTED REPRODUCTIONS ======================")
     for i in range(1,10):
         lista_pequeña = lt.getElement(respuesta[0][0], i)
+        #print(lista_pequeña)
         genero = lt.firstElement(lista_pequeña)
         eventos = lt.lastElement(lista_pequeña)
         print("TOP "+str(i)+": "+str(genero)+" with "+str(eventos)+" reps")
     lista_mayor = lt.firstElement(respuesta[0][0])
     genero_mayor = lt.firstElement(lista_mayor)
     eventos_mayor = lt.lastElement(lista_mayor)
-    print("\nThe TOP GENRE is "+str(genero_mayor)+" with "+str(eventos_mayor)+" reproductions")
+    print("\nThe TOP GENRE is "+str(genero_mayor)+" with "+str(eventos_mayor)+" reproductions...\n")
 
     print("========================== "+str(genero_mayor)+" SENTIMENT ANALYSIS =========================")
     print(str(genero_mayor)+" has "+str(respuesta[1][1])+" unique tracks...")
@@ -167,18 +201,19 @@ Menu principal
 while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
+
     if int(inputs[0]) == 1:
         print("\nInicializando....")
-        # cont es el controlador que se usará de acá en adelante
+        # catalog es el controlador que se usará de acá en adelante
         catalog = controller.initCatalog()
         
     elif int(inputs[0]) == 2:
         print("\nCargando información de eventos ....")
-        respuesta = controller.loadData(catalog)
-        print('Altura del arbol: ' + str(controller.indexHeight(catalog)))
-        print('Elementos en el arbol: ' + str(controller.indexSize(catalog)))
-        print('Menor Llave: ' + str(controller.minKey(catalog)))
-        print('Mayor Llave: ' + str(controller.maxKey(catalog)))
+        controller.loadData(catalog)
+        print('\n-Eventos cargados: ' + str(controller.sizeList(catalog, "eventos")))
+        print('\n-Canciones únicas: ' + str(controller.sizeMap(catalog, "track_id")))
+        printResults(catalog["eventos"])
+        print('\n-Artistas únicos: ' + str(controller.sizeMap(catalog, "artist_id")))
 
 
     elif int(inputs[0]) == 3:
@@ -190,9 +225,7 @@ while True:
         #
         respuesta = controller.requerimiento1(catalog, menor, mayor, caracteristica)
 
-        print('\n++++++ Req No. 1 results... +++++')
-        print('Instrumentalness is between '+str(menor)+' and '+str(mayor))
-        print("Total of reproduction: "+str(respuesta[0])+" Total of unique artists: "+str(respuesta[1]))
+        printReq1(menor, mayor, respuesta)
         print("\nSe ejecutó el requerimiento 1\n")
 
 
@@ -203,6 +236,7 @@ while True:
         mayor2 = float(input("Ingrese el rango mayor de Danceability: "))
         #
         menor1, mayor1, menor2, mayor2 = 0.5, 0.75, 0.75, 1 
+        #
         respuesta = controller.requerimiento2(catalog, menor1, mayor1, menor2, mayor2)
         
         printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1], 2)

@@ -42,20 +42,22 @@ los mismos.
 
 # Construccion de modelos
 
-def newAnalyzer():
-    """ Inicializa el analizador
+def newCatalog():
+    """ Inicializa el catálogo
 
-    Crea una lista vacia para guardar todos los crimenes
-    Se crean indices (Maps) por los siguientes criterios:
-    -Fechas
+    Crea un diccionario cuyos valores serán las estructuras de datos.
+    Se crea un Ordered Map para cada característica de contenido utilizada.
+    Además, se crea un Map para las pistas y otro Map los hashtags.
 
-    Retorna el analizador inicializado.
+    Retorna el catálogo inicializado.
     """
-#11
     catalog = {'instrumentalness': None,
                 "danceability": None,
                 "tempo": None,
                 "energy": None,
+
+                "eventos": None, # Lista con todos los eventos de context_content
+                "artistas": None, # Mapa con artistas no repetidos
 
                 "time": None,
 
@@ -72,45 +74,88 @@ def newAnalyzer():
     catalog["energy"] = om.newMap(omaptype='RBT',
                                       comparefunction=None)
 
+    catalog["eventos"] = lt.newList("ARRAY_LIST")
+    catalog["artist_id"] = mp.newMap()
+
     catalog["time"] = om.newMap(omaptype='RBT',
                                       comparefunction=None)
 
     catalog["track_id"] = mp.newMap()
-
     catalog["hashtag"] = mp.newMap()
 
     return catalog
 
-
-# Funciones para agregar informacion al catalogo
+# Funciones para agregar información al catálogo
 
 def addEvento(catalog, evento):
 
-    addEventoInstrumentalness1(catalog, evento, 'instrumentalness')
-    addEventoInstrumentalness1(catalog, evento, 'danceability')
-    addEventoInstrumentalness1(catalog, evento, 'tempo')
-    addEventoInstrumentalness1(catalog, evento, 'energy')
-    addEventoInstrumentalness1(catalog, evento, 'time')
+    addEventoCaracteristica(catalog, evento, 'instrumentalness')
+    addEventoCaracteristica(catalog, evento, 'danceability')
+    addEventoCaracteristica(catalog, evento, 'tempo')
+    addEventoCaracteristica(catalog, evento, 'energy')
+    addEventoCaracteristica(catalog, evento, 'time')
+    addArtista(catalog, evento)
+    lt.addLast(catalog["eventos"], evento)
+
+
+def addArtista(catalog, evento):
+
+    artista_map = catalog['artist_id']
+ 
+    artista = evento['artist_id']
+
+    existartista = mp.contains(artista_map, artista)
+
+    if not existartista:
+        artistas = newArtista(evento)
+        mp.put(artista_map, artista, artistas)
+
+def newArtista(evento):
     
-def addTrack(catalog, evento):
+    entry = {'artista': "", "vader_avg": None}
+    entry['artista'] = evento["artist_id"]
+    entry['vader_avg'] = evento["artist_id"]
+    return entry
 
-    mapa_tracks = catalog["track_id"]
+"""
+def addArtista(catalog, evento):
 
-    if mp.contains(mapa_tracks, evento["track_id"]):
-        mapa_hashtags = me.getValue(mp.get(mapa_tracks, evento["track_id"]))
-        mp.put(mapa_hashtags, evento["hashtag"], None)
-        
+    artista = evento["artist_id"]
+"""
+
+def addEventoCaracteristica(catalog, evento, CARACTERISTICA):
+    """
+    Esta funcion adiciona un evento al Map de la característica dada 
+    (e.g. instrumentalness). Los eventos se guardan en un Map, donde 
+    la llave es el valor de instrumentalness y el valor es la lista
+    de eventos con ese instrumentalness.
+    """
+
+    caracter_map = catalog[CARACTERISTICA]
+ 
+    ValorCaracter = evento[CARACTERISTICA]
+
+    existValorCaracteristica = om.contains(caracter_map, ValorCaracter)
+
+    if existValorCaracteristica:
+        entry = om.get(caracter_map, ValorCaracter)
+        caracter_values = me.getValue(entry)
     else:
-        nuevo_mapa_hashtags = mp.newMap()
-        mp.put(mapa_tracks, evento[0], nuevo_mapa_hashtags)
+        caracter_values = newValorCaracteristica(ValorCaracter, CARACTERISTICA)
+        om.put(caracter_map, ValorCaracter, caracter_values)
+    lt.addLast(caracter_values['eventos'], evento)
+ 
+def newValorCaracteristica(ValorCaracteristica, CARACTERISTICA):
+    """
+    Esta función crea la estructura de eventos asociados
+    a una característica.
+    """
+    entry = {CARACTERISTICA: "", "eventos": None}
+    entry[CARACTERISTICA] = ValorCaracteristica
+    entry['eventos'] = lt.newList('ARRAY_LIST')
+    return entry
 
-def addHashtag(catalog, hashtag):
 
-    mapa_hashtags = catalog["hashtag"]
-
-    mp.put(mapa_hashtags, hashtag["hashtag"], hashtag["vader_avg"])
-
-###
 def addTrack(catalog, evento):
 
     track_map = catalog['track_id']
@@ -126,16 +171,12 @@ def addTrack(catalog, evento):
         mp.put(track_map, track_id, hashtags)
     mp.put(hashtags['eventos'], evento["hashtag"], None) 
  
-
 def newTrack(track_id):
     
     entry = {'track_id': "", "eventos": None}
     entry['track_id'] = track_id
     entry['eventos'] = mp.newMap()
     return entry
-###
-
-
 
 
 def addHashtag(catalog, evento):
@@ -150,7 +191,6 @@ def addHashtag(catalog, evento):
         hashtags = newHashtag(evento)
         mp.put(hashtag_map, hashtag, hashtags)
 
-
 def newHashtag(evento):
     
     entry = {'hashtag': "", "vader_avg": None}
@@ -159,75 +199,57 @@ def newHashtag(evento):
     return entry
 
 
-
-
-
-def addEventoInstrumentalness1(catalog, evento, CARACTERISTICA):
-    """
-    Esta funcion adiciona un video a la lista de videos.
-    Los países se guardan en un Map, donde la llave es el país
-    y el valor la lista de videos de ese país.
-    """
-
-    countries_map = catalog[CARACTERISTICA]
- 
-    pubcountry = evento[CARACTERISTICA]
-
-    existcountry = om.contains(countries_map, pubcountry)
-
-    if existcountry:
-        entry = om.get(countries_map, pubcountry)
-        country_values = me.getValue(entry)
-    else:
-        country_values = newCountry1(pubcountry, CARACTERISTICA)
-        om.put(countries_map, pubcountry, country_values)
-    lt.addLast(country_values['eventos'], evento)
- 
-
-def newCountry1(pubcountry, CARACTERISTICA):
-    """
-    Esta funcion crea la estructura de videos asociados
-    a un año.
-    """
-    entry = {CARACTERISTICA: "", "eventos": None}
-    entry[CARACTERISTICA] = pubcountry
-    entry['eventos'] = lt.newList('ARRAY_LIST')
-    return entry
-
-
 # Funciones de consulta
 
-def indexHeight(analyzer):
+def sizeList(catalog, lista):
+    tamaño = lt.size(catalog[lista])
+    return tamaño
+
+def sizeMap(catalog, mapa):
+    tamaño = mp.size(catalog[mapa])
+    return tamaño
+
+def r():
+    a = "fd"
+    return a
+
+def indexHeight(catalog):
     """
-    Altura del arbol
+    Altura del árbol
     """
-    return om.height(analyzer['instrumentalness'])
+    return om.height(catalog['instrumentalness'])
+
+def indexSize(catalog):
+    """
+    Número de elementos en el índice
+    """
+    return om.size(catalog['instrumentalness'])
+
+def minKey(catalog):
+    """
+    Llave más pequeña
+    """
+    return om.minKey(catalog['instrumentalness'])
+
+def maxKey(catalog):
+    """
+    Llave más grande
+    """
+    return om.maxKey(catalog['instrumentalness'])
 
 
-def indexSize(analyzer):
-    """
-    Numero de elementos en el indice
-    """
-    return om.size(analyzer['instrumentalness'])
-
-
-def minKey(analyzer):
-    """
-    Llave mas pequena
-    """
-    return om.minKey(analyzer['instrumentalness'])
-
-
-def maxKey(analyzer):
-    """
-    Llave mas grande
-    """
-    return om.maxKey(analyzer['instrumentalness'])
+# Funciones de requerimientos
 
 def requerimiento1(catalog, menor, mayor, caracteristica):
 
     mapa = om.newMap('RBT')
+    # Mapa donde se guardan los artistas sin repeticiones
+
     lst = om.values(catalog[caracteristica], menor, mayor)
+    # Lista de listas de eventos que cumplen con el rango de la característica
+
+    # Se recorre la lista de listas, contando el total de eventos y añadiendo los
+    # artistas al mapa, el valor se eligió al azar
     eventos = 0
     for lstdate in lt.iterator(lst):
         eventos += lt.size(lstdate['eventos'])
@@ -240,8 +262,9 @@ def requerimiento1(catalog, menor, mayor, caracteristica):
 
 def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
     """
-    Retorna el numero de crimenes en un rago de fechas.
     """
+    # Se crea un mapa donde se guardan las canciones que cumplen con el rango 
+    # de energy, el valor es una tupla con el energy
     mapa_energy = om.newMap('RBT')
     lst = om.values(catalog['energy'], menor1, mayor1)
 
@@ -310,6 +333,7 @@ def requerimiento3(catalog, menor1, mayor1, menor2, mayor2):
 
     return tamaño, mapa_aleatorias
 
+
 def requerimiento4(catalog, mapa_generos):
 
     eventos_total = 0
@@ -323,6 +347,7 @@ def requerimiento4(catalog, mapa_generos):
         eventos_total += eventos
 
     return mapa_generos, eventos_total
+
 
 def requerimiento5_parte1(catalog, horamin, horamax):
 
@@ -464,7 +489,7 @@ def requerimiento5_parte1(catalog, horamin, horamax):
 
     return lista_final, conteo_total, lista_genero_mayor
 
-
+"""
 def requerimiento5_parte2_ANTES(catalog, lista_genero_mayor):
     
     mapa_final = mp.newMap()
@@ -478,9 +503,28 @@ def requerimiento5_parte2_ANTES(catalog, lista_genero_mayor):
     print(mp.size(mapa_final))
 
     return mapa_final
+"""
 
 def requerimiento5_parte2(catalog, lista_genero_mayor):
     
+    print(lt.size(lista_genero_mayor))
+
+    lista_prueba1 = []
+    lista_prueba2 = lt.newList()
+
+    for e in lt.iterator(lista_genero_mayor):
+        if e["track_id"] not in lista_prueba1:
+            lista_prueba1.append(e["track_id"])
+        if lt.isPresent(lista_prueba2, e["track_id"]) == False:
+            lt.addLast(lista_prueba2, e["track_id"])
+        
+    print(len(lista_prueba1))
+    print(lista_prueba1 )
+    print(lt.size(lista_prueba2))
+    #print(lista_genero_mayor)
+
+
+
     # Se crea un mapa para guardar los track_id y contar sin repeticiones
     mapa_final = mp.newMap()
 
@@ -571,4 +615,4 @@ def cmpHashtags (lista1, lista2):
     Compara dos listas [track_id, promedio, cantidad_hashtags] por 
     cantidad_hashtags
     """
-    return lt.lastElement(lista1) > lt.lastElement(lista2)  
+    return lt.lastElement(lista1) > lt.lastElement(lista2)
