@@ -251,6 +251,7 @@ def requerimiento5(catalog, horamin, horamax):
 
     return delta_time, delta_memory, (parte1 , parte2)
 
+
 # ======================================
 # Funciones para medir tiempo y memoria
 # ======================================

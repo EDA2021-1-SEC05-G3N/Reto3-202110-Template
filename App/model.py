@@ -117,11 +117,6 @@ def newArtista(evento):
     entry['vader_avg'] = evento["artist_id"]
     return entry
 
-"""
-def addArtista(catalog, evento):
-
-    artista = evento["artist_id"]
-"""
 
 def addEventoCaracteristica(catalog, evento, CARACTERISTICA):
     """
@@ -202,133 +197,112 @@ def newHashtag(evento):
 # Funciones de consulta
 
 def sizeList(catalog, lista):
-    tamaño = lt.size(catalog[lista])
-    return tamaño
+    """
+    Número de elementos en la lista del catálogo
+    """
+    return lt.size(catalog[lista])
 
 def sizeMap(catalog, mapa):
-    tamaño = mp.size(catalog[mapa])
-    return tamaño
-
-def r():
-    a = "fd"
-    return a
-
-def indexHeight(catalog):
     """
-    Altura del árbol
+    Número de elementos en el mapa del catálogo
     """
-    return om.height(catalog['instrumentalness'])
-
-def indexSize(catalog):
-    """
-    Número de elementos en el índice
-    """
-    return om.size(catalog['instrumentalness'])
-
-def minKey(catalog):
-    """
-    Llave más pequeña
-    """
-    return om.minKey(catalog['instrumentalness'])
-
-def maxKey(catalog):
-    """
-    Llave más grande
-    """
-    return om.maxKey(catalog['instrumentalness'])
+    return mp.size(catalog[mapa])
 
 
 # Funciones de requerimientos
 
 def requerimiento1(catalog, menor, mayor, caracteristica):
+    """
+    Devuelve las reproducciones (y artistas únicos) dado un rango de característica
+    """
+    mapa_final = om.newMap('RBT')
+    # Mapa donde se guardan los artistas sin repeticiones que cumplen con el rango
 
-    mapa = om.newMap('RBT')
-    # Mapa donde se guardan los artistas sin repeticiones
-
-    lst = om.values(catalog[caracteristica], menor, mayor)
+    lista_rango = om.values(catalog[caracteristica], menor, mayor)
     # Lista de listas de eventos que cumplen con el rango de la característica
 
     # Se recorre la lista de listas, contando el total de eventos y añadiendo los
-    # artistas al mapa, el valor se eligió al azar
+    # artistas al mapa como llaves, cuyo valor se eligió al azar
     eventos = 0
-    for lstdate in lt.iterator(lst):
-        eventos += lt.size(lstdate['eventos'])
-        for e in lt.iterator(lstdate['eventos']):
-            om.put(mapa, e['artist_id'], "Maria José")
-    tamaño_mapa = om.size(mapa)
+    for lista_caract in lt.iterator(lista_rango):
+        eventos += lt.size(lista_caract['eventos'])
+        for e in lt.iterator(lista_caract['eventos']):
+            om.put(mapa_final, e['artist_id'], "Maria José")
 
-    return eventos, tamaño_mapa, mapa
+    tamaño_mapa = om.size(mapa_final)
+
+    return eventos, tamaño_mapa, mapa_final
 
 
 def requerimiento2(catalog, menor1, mayor1, menor2, mayor2):
-    """
-    """
-    # Se crea un mapa donde se guardan las canciones que cumplen con el rango 
-    # de energy, el valor es una tupla con el energy
-    mapa_energy = om.newMap('RBT')
-    lst = om.values(catalog['energy'], menor1, mayor1)
 
-    for lstdate in lt.iterator(lst):
-        for e in lt.iterator(lstdate['eventos']):
-            om.put(mapa_energy, e['track_id'], (e['energy'], e['danceability']))
-    #mapa_energy = {"1c8b0f2a8d7b1af0ed5af2fcd6f084e1": (0.65, 0.78)}
+    # Mapa donde se guardan las canciones que cumplen con el rango 
+    # de danceability, el valor es una tupla con el energy y el 
+    # danceability de la canción
+    mapa_dance = om.newMap('BST')
 
-    canciones = om.keySet(mapa_energy)
-    #canciones = ["34234532fgfdgfdhg45., esfsadfsdafsadf3455, ..."]
+    # Lista de listas de eventos que cumplen con el rango de danceability
+    lista_rango = om.values(catalog['danceability'], menor2, mayor2)
 
-    seleccionadas = om.newMap('RBT')
+    for lista_energy in lt.iterator(lista_rango):
+        for e in lt.iterator(lista_energy['eventos']):
+            om.put(mapa_dance, e['track_id'], (e['energy'], e['danceability']))
+
+    # Lista de las canciones que cumplen con el danceability 
+    canciones = om.keySet(mapa_dance)
+
+    # Se recorre la lista de canciones que cumple con danceability y se revisa 
+    # cuáles de esas no cumplen con el rango de energy y se eliminan del mapa 
     for cancion in lt.iterator(canciones):
-        energy = (me.getValue(om.get(mapa_energy, cancion)))[0]
-        dance = (me.getValue(om.get(mapa_energy, cancion)))[1]
-        if dance <= mayor2 and dance >= menor2:
-            om.put(seleccionadas, cancion, (energy, dance))
-    #seleccionadas = {"1c8b0f2a8d7b1af0ed5af2fcd6f084e1": (0.65, 0.78)}
+        energy = (me.getValue(om.get(mapa_dance, cancion)))[0]
+        dance = (me.getValue(om.get(mapa_dance, cancion)))[1]
+        if not (energy <= mayor1 and energy >= menor1):
+            om.remove(mapa_dance, cancion)
    
     # Se obtiene el tamaño del mapa
-    tamaño = om.size(seleccionadas) 
-    # Se obtiene una lista con cinco números aleatorios diferentes 
+    tamaño = om.size(mapa_dance) 
+
+    # Se obtiene una lista con cinco números aleatorios no repetidos 
     # que estén dentro del rango del tamaño 
     lista_cinco_aleatorios = random.sample(range(tamaño), 5)
 
     # Se crea un mapa para guardar las llaves aleatorias y sus valores
     mapa_aleatorias = om.newMap('RBT')
     for i in lista_cinco_aleatorios:
-        llave_aleatoria = om.select(seleccionadas, i)
-        valor = me.getValue(om.get(mapa_energy, llave_aleatoria))
+        llave_aleatoria = om.select(mapa_dance, i)
+        valor = me.getValue(om.get(mapa_dance, llave_aleatoria))
         om.put(mapa_aleatorias, llave_aleatoria, valor)
 
     return tamaño, mapa_aleatorias
 
 
 def requerimiento3(catalog, menor1, mayor1, menor2, mayor2):
-    """
-    Retorna el numero de crimenes en un rago de fechas.
-    """
-    mapa_instrumentalness = om.newMap('RBT')
-    lst = om.values(catalog['instrumentalness'], menor1, mayor1)
 
-    for lstdate in lt.iterator(lst):
-        for e in lt.iterator(lstdate['eventos']):
-            om.put(mapa_instrumentalness, e['track_id'], (e['instrumentalness'], e['tempo']))
+    mapa_tempo = om.newMap('BST')
 
-    canciones = om.keySet(mapa_instrumentalness)
+    lista_rango = om.values(catalog['tempo'], menor2, mayor2)
 
-    seleccionadas = om.newMap('RBT')
+    for lista_instrumentalness in lt.iterator(lista_rango):
+        for e in lt.iterator(lista_instrumentalness['eventos']):
+            om.put(mapa_tempo, e['track_id'], (e['instrumentalness'], e['tempo']))
+
+    canciones = om.keySet(mapa_tempo)
+
     for cancion in lt.iterator(canciones):
-        instrumental = (me.getValue(om.get(mapa_instrumentalness, cancion)))[0]
-        tempo = (me.getValue(om.get(mapa_instrumentalness, cancion)))[1]
-        if tempo <= mayor2 and tempo >= menor2:
-            om.put(seleccionadas, cancion, (instrumental, tempo))
+        instrumental = (me.getValue(om.get(mapa_tempo, cancion)))[0]
+        tempo = (me.getValue(om.get(mapa_tempo, cancion)))[1]
+        if not (instrumental <= mayor1 and instrumental >= menor1):
+            om.remove(mapa_tempo, cancion)
 
-    tamaño = om.size(seleccionadas) 
+    tamaño = om.size(mapa_tempo) 
 
     mapa_aleatorias = om.newMap('RBT')
 
     lista_cinco_aleatorios = random.sample(range(tamaño), 5)
 
     for i in lista_cinco_aleatorios:
-        llave_aleatoria = om.select(seleccionadas, i)
-        valor = me.getValue(om.get(mapa_instrumentalness, llave_aleatoria))
+        llave_aleatoria = om.select(mapa_tempo, i)
+        valor = me.getValue(om.get(mapa_tempo, llave_aleatoria))
         om.put(mapa_aleatorias, llave_aleatoria, valor)
 
     return tamaño, mapa_aleatorias
@@ -336,14 +310,19 @@ def requerimiento3(catalog, menor1, mayor1, menor2, mayor2):
 
 def requerimiento4(catalog, mapa_generos):
 
+    # Se hace un conteo de todas las reproducciones
     eventos_total = 0
 
-    for i in lt.iterator(om.keySet(mapa_generos)):
-
-        menor = me.getValue(om.get(mapa_generos, i))[0]
-        mayor = me.getValue(om.get(mapa_generos, i))[1]
+    # Se recorre el mapa con los generos
+    for genero in lt.iterator(om.keySet(mapa_generos)):
+        # Se toman los límites de tempo
+        menor = me.getValue(om.get(mapa_generos, genero))[0]
+        mayor = me.getValue(om.get(mapa_generos, genero))[1]
+        # Se llama al Req. 1
         eventos, tamaño_mapa, mapa = requerimiento1(catalog, menor, mayor, 'tempo')
-        om.put(mapa_generos, i, (eventos, tamaño_mapa,  mapa, menor, mayor))
+        # Se agrega al mismo mapa una tupla con los datos necesarios de cada género
+        om.put(mapa_generos, genero, (eventos, tamaño_mapa,  mapa, menor, mayor))
+        # Se suman los eventos de cada género al contador general
         eventos_total += eventos
 
     return mapa_generos, eventos_total
@@ -506,19 +485,6 @@ def requerimiento5_parte2_ANTES(catalog, lista_genero_mayor):
 """
 
 def requerimiento5_parte2(catalog, lista_genero_mayor):
-    
-    print(lt.size(lista_genero_mayor))
-
-    lista_prueba1 = []
-    lista_prueba2 = lt.newList()
-
-    for e in lt.iterator(lista_genero_mayor):
-        if e["track_id"] not in lista_prueba1:
-            lista_prueba1.append(e["track_id"])
-        if lt.isPresent(lista_prueba2, e["track_id"]) == False:
-            lt.addLast(lista_prueba2, e["track_id"])
-
-
 
     # Se crea un mapa para guardar los track_id y contar sin repeticiones
     mapa_final = mp.newMap()

@@ -113,10 +113,12 @@ def printReq2_3(menor1, mayor1, menor2, mayor2, numero, mapa, req):
     n = 1
     for llave in lt.iterator(lista_llaves):
         valor = me.getValue(om.get(mapa, llave))
-        print('Track '+str(n)+': '+str(llave)+' with '+parametro1.lower()+' of '+str(valor[0])+' and '+parametro2.lower()+' of '+str(valor[1]))
+        print('Track '+str(n)+': '+str(llave)+' with '+parametro1.lower()+
+            ' of '+str(valor[0])+' and '+parametro2.lower()+' of '+str(valor[1]))
         n += 1
 
 def crear_mapa_generos (cantidad_generos, nuevo_genero):
+
     mapa_generos = om.newMap()
 
     for i in range(cantidad_generos):
@@ -126,7 +128,6 @@ def crear_mapa_generos (cantidad_generos, nuevo_genero):
             mayor = float(input("Ingrese el rango mayor de Tempo: "))
         else:
             nuevo = input("Ingrese el género musical #"+str(i+1)+": ")
-
             if nuevo == "Reggae":
                 menor, mayor = 60, 90
             elif nuevo == "Down-tempo":
@@ -227,7 +228,7 @@ while True:
         respuesta = controller.requerimiento1(catalog, menor, mayor, caracteristica)
 
         printReq1(menor, mayor, respuesta[2])
-        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+        print("\nTiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 1\n")
 
@@ -238,12 +239,12 @@ while True:
         menor2 = float(input("Ingrese el rango menor de Danceability: "))
         mayor2 = float(input("Ingrese el rango mayor de Danceability: "))
         #
-        menor1, mayor1, menor2, mayor2 = 0.5, 0.75, 0.75, 1 
+        menor1, mayor1, menor2, mayor2 = 0.5, 0.75, 0.75, 1.0 
         #
         respuesta = controller.requerimiento2(catalog, menor1, mayor1, menor2, mayor2)
         
         printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[2][0], respuesta[2][1], 2)
-        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+        print("\nTiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 2\n")
 
@@ -259,7 +260,7 @@ while True:
         respuesta = controller.requerimiento3(catalog, menor1, mayor1, menor2, mayor2)
         
         printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[2][0], respuesta[2][1], 3)
-        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+        print("\nTiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 3\n")
 
@@ -270,10 +271,10 @@ while True:
         mapa_generos = crear_mapa_generos(cantidad_generos, nuevo_genero)
 
         respuesta = controller.requerimiento4(catalog, mapa_generos)
-        printReq4(respuesta[2])
-        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
-              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
 
+        printReq4(respuesta[2])
+        print("\nTiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 4\n")
 
 
@@ -284,14 +285,12 @@ while True:
         horamin = datetime.datetime.strptime("7:15:00", '%H:%M:%S').time()
         horamax = datetime.datetime.strptime("9:45:00", '%H:%M:%S').time()
         #
-        
-        #print(mp.keySet((catalog["track_id"])))
-        respuesta = controller.requerimiento5(catalog, horamin, horamax)
-        #print(respuesta[1])
-        printReq5(respuesta[2], horamin, horamax)
-        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
-              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
 
+        respuesta = controller.requerimiento5(catalog, horamin, horamax)
+
+        printReq5(respuesta[2], horamin, horamax)
+        print("\nTiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 5\n")
     else:
         sys.exit(0)
