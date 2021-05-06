@@ -31,6 +31,7 @@ assert cf
 import model
 import datetime
 
+
 """
 La vista se encarga de la interacción con el usuario
 Presenta el menú de opciones y por cada selección
@@ -225,7 +226,9 @@ while True:
         #
         respuesta = controller.requerimiento1(catalog, menor, mayor, caracteristica)
 
-        printReq1(menor, mayor, respuesta)
+        printReq1(menor, mayor, respuesta[2])
+        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 1\n")
 
 
@@ -239,7 +242,9 @@ while True:
         #
         respuesta = controller.requerimiento2(catalog, menor1, mayor1, menor2, mayor2)
         
-        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1], 2)
+        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[2][0], respuesta[2][1], 2)
+        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 2\n")
 
 
@@ -253,7 +258,9 @@ while True:
         #
         respuesta = controller.requerimiento3(catalog, menor1, mayor1, menor2, mayor2)
         
-        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[0], respuesta[1], 3)
+        printReq2_3(menor1, mayor1, menor2, mayor2, respuesta[2][0], respuesta[2][1], 3)
+        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
         print("\nSe ejecutó el requerimiento 3\n")
 
 
@@ -263,7 +270,9 @@ while True:
         mapa_generos = crear_mapa_generos(cantidad_generos, nuevo_genero)
 
         respuesta = controller.requerimiento4(catalog, mapa_generos)
-        printReq4(respuesta)
+        printReq4(respuesta[2])
+        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
 
         print("\nSe ejecutó el requerimiento 4\n")
 
@@ -279,7 +288,9 @@ while True:
         #print(mp.keySet((catalog["track_id"])))
         respuesta = controller.requerimiento5(catalog, horamin, horamax)
         #print(respuesta[1])
-        printReq5(respuesta, horamin, horamax)
+        printReq5(respuesta[2], horamin, horamax)
+        print("Tiempo [ms]: ", f"{respuesta[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{respuesta[1]:.3f}")
 
         print("\nSe ejecutó el requerimiento 5\n")
     else:

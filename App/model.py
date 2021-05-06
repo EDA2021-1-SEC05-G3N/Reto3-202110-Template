@@ -517,11 +517,6 @@ def requerimiento5_parte2(catalog, lista_genero_mayor):
             lista_prueba1.append(e["track_id"])
         if lt.isPresent(lista_prueba2, e["track_id"]) == False:
             lt.addLast(lista_prueba2, e["track_id"])
-        
-    print(len(lista_prueba1))
-    print(lista_prueba1 )
-    print(lt.size(lista_prueba2))
-    #print(lista_genero_mayor)
 
 
 
