@@ -68,13 +68,13 @@ def printResults(lista_eventos, sample=5):
         i = 1
         while i <= sample:
             evento = lt.getElement(lista_eventos, i)
-            print("\nEvento # "+str(i))
-            print("id del evento: "+str(evento["id"]))
-            print("id del user: "+str(evento["user_id"]))
-            print("id de la canción: "+str(evento["track_id"]))
-            print("instrumentalness: "+str(evento["instrumentalness"]))
-            print("danceability: "+str(evento["danceability"]))
-            print("tempo: "+str(evento["tempo"]))
+            print("\nEvento #"+str(i))
+            print("Id del evento: "+str(evento["id"]))
+            print("Id del user: "+str(evento["user_id"]))
+            print("Id de la canción: "+str(evento["track_id"]))
+            print("Instrumentalness: "+str(evento["instrumentalness"]))
+            print("Danceability: "+str(evento["danceability"]))
+            print("Tempo: "+str(evento["tempo"]))
             i+=1
         print("\nLos últimos 5 eventos cargados son: ")
         i = -4
@@ -119,7 +119,7 @@ def printReq2_3(menor1, mayor1, menor2, mayor2, numero, mapa, req):
 
 def crear_mapa_generos (cantidad_generos, nuevo_genero):
 
-    mapa_generos = om.newMap()
+    mapa_generos = om.newMap("RBT")
 
     for i in range(cantidad_generos):
         if i == cantidad_generos-1 and (nuevo_genero in "sísiSíSiSISÍ"):
@@ -153,12 +153,12 @@ def crear_mapa_generos (cantidad_generos, nuevo_genero):
 
 def printReq4 (respuesta):
     print('\n++++++ Req No. 4 results... +++++\n'+'Total of reproductions: '+str(respuesta[1]))
-    for i in lt.iterator(om.keySet(respuesta[0])):
-        eventos, tamaño_mapa, mapa, menor, mayor = me.getValue(om.get(mapa_generos, i))
-        print("\n========"+" "+i+" "+"========")
-        print("For "+i+" the tempo is between "+str(menor)+" and "+str(mayor)+" BPM")
-        print(i+" reproductions: "+str(eventos)+" with "+str(tamaño_mapa)+" different artists")
-        print("-----"+" Some artists for "+i+" "+"-----")
+    for genero in lt.iterator(om.keySet(respuesta[0])):
+        eventos, tamaño_mapa, mapa, menor, mayor = me.getValue(om.get(mapa_generos, genero))
+        print("\n========"+" "+genero.upper()+" "+"========")
+        print("For "+genero+" the tempo is between "+str(menor)+" and "+str(mayor)+" BPM")
+        print(genero+" reproductions: "+str(eventos)+" with "+str(tamaño_mapa)+" different artists")
+        print("-----"+" Some artists for "+genero+" "+"-----")
         n = 1
         for artista in lt.iterator(om.keySet(mapa)):
             print('Artist '+str(n)+': '+str(artista))
@@ -172,7 +172,6 @@ def printReq5 (respuesta, horamin, horamax):
     print("====================== GENRES SORTED REPRODUCTIONS ======================")
     for i in range(1,10):
         lista_pequeña = lt.getElement(respuesta[0][0], i)
-        #print(lista_pequeña)
         genero = lt.firstElement(lista_pequeña)
         eventos = lt.lastElement(lista_pequeña)
         print("TOP "+str(i)+": "+str(genero)+" with "+str(eventos)+" reps")
@@ -268,8 +267,8 @@ while True:
     elif int(inputs[0]) == 6:   
         cantidad_generos = int(input("¿Cuántos generos desea buscar? "))
         nuevo_genero = input("¿Desea añadir un nuevo género? ")
+        
         mapa_generos = crear_mapa_generos(cantidad_generos, nuevo_genero)
-
         respuesta = controller.requerimiento4(catalog, mapa_generos)
 
         printReq4(respuesta[2])

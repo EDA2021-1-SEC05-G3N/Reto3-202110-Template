@@ -128,32 +128,7 @@ def sizeList(catalog, lista):
 def sizeMap(catalog, mapa):
     return model.sizeMap(catalog, mapa)
 
-def indexHeight(catalog):
-    """
-    Altura del indice (arbol)
-    """
-    return model.indexHeight(catalog)
 
-
-def indexSize(catalog):
-    """
-    Numero de nodos en el arbol
-    """
-    return model.indexSize(catalog)
-
-
-def minKey(catalog):
-    """
-    La menor llave del arbol
-    """
-    return model.minKey(catalog)
-
-
-def maxKey(catalog):
-    """
-    La mayor llave del arbol
-    """
-    return model.maxKey(catalog)
 
 def requerimiento1(catalog, menor, mayor, caracteristica):
     delta_time = -1.0
